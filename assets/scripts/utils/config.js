@@ -137,10 +137,10 @@ const atlasList = [
   "GJ_LaunchSheet",
   "player_ball_00",
   "player_dart_00",
-  "GJ_ParticleSheet-uhd",
   "GJ_ParticleSheet",
-  "PixelSheet_01-hd",
-  "FireSheet_01-hd",
+  "GJ_ParticleSheet",
+  "PixelSheet_01",
+  "FireSheet_01",
   "Wavesheet",
 ];
 function getAtlasFrame(scene, frameName) {

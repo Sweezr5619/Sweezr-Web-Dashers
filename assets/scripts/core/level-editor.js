@@ -1544,10 +1544,10 @@ class LevelEditor {
         "GJ_GameSheet02",
         "GJ_GameSheet03",
         "GJ_GameSheet04",
-        "FireSheet_01-hd",
-        "PixelSheet_01-hd",
+        "FireSheet_01",
+        "PixelSheet_01",
         "GJ_GameSheetEditor",
-        "GJ_ParticleSheet-uhd",
+        "GJ_ParticleSheet",
         "Wavesheet"
     ];
     for (const key of sheets) {
@@ -1559,7 +1559,7 @@ class LevelEditor {
 
 
   _getTextureRefForFrameThingy(frameName) { // getSheetForFrameThingy: the sequel
-    const sheets = ["GJ_WebSheet", "GJ_GameSheet", "GJ_GameSheet02", "GJ_GameSheet03", "GJ_GameSheet04", "GJ_GameSheetEditor", "PixelSheet_01-hd", "GJ_ParticleSheet-uhd", "FireSheet_01-hd"];
+    const sheets = ["GJ_WebSheet", "GJ_GameSheet", "GJ_GameSheet02", "GJ_GameSheet03", "GJ_GameSheet04", "GJ_GameSheetEditor", "PixelSheet_01", "GJ_ParticleSheet", "FireSheet_01"];
     for (const key of sheets) {
         if (this.textures.exists(key) && this.textures.get(key).has(frameName)) {
             return {
@@ -1792,6 +1792,18 @@ class LevelEditor {
         return null;
     }
 
+    if (letterBlockKind(objId)) {
+        const letterLabel = this.add.text(0, 0, letterBlockKind(objId).toUpperCase(), {
+            fontFamily: "Pusab, Arial, sans-serif",
+            fontSize: "34px",
+            color: "#ffffff",
+            stroke: "#000000",
+            strokeThickness: 6
+        }).setOrigin(0.5);
+        letterLabel.setAlpha(0.85);
+        preview.add(letterLabel);
+    }
+
     sprites.sort((a, b) => {
         return (a._editorPreviewDepth || 0) - (b._editorPreviewDepth || 0);
     });
@@ -1870,8 +1882,9 @@ class LevelEditor {
             });
         });
         const activeCatDef = OBJECT_CATEGORIES.find(c => c.id === this._currentBuildCategory);
-        const matchesCategory = (catDef, rawDef) => {
+        const matchesCategory = (catDef, rawDef, id) => {
             if (!catDef || !rawDef) return false;
+            if (letterBlockKind(id)) return catDef.id === "blocks" || catDef.id === "deco";
             if ((catDef.types || []).includes(rawDef.type)) return true;
             if (catDef.id !== "slopes") return false;
 
@@ -1893,7 +1906,7 @@ class LevelEditor {
             const def = getObjectFromId(i);
             const rawDef = allObjectsData[String(i)]; 
             
-            if (def && rawDef && matchesCategory(activeCatDef, rawDef)) {
+            if (def && rawDef && matchesCategory(activeCatDef, rawDef, i)) {
                 itemsForGrid.push({ type: "object", id: i, frame: def.frame });
             }
         }
@@ -3466,7 +3479,7 @@ class LevelEditor {
 
 
   _getColourPickerTextureRef(frameName) {
-    const sheet = "CCControlColourPickerSpriteSheet-uhd";
+    const sheet = "CCControlColourPickerSpriteSheet";
 
     if (
         this.textures.exists(sheet) &&

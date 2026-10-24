@@ -442,6 +442,7 @@ class PlayerObject {
     this._lastCollisionWorldX = null;
     this._lastCollisionWorldY = null;
     this._ignoreTeleportUntilClear = false;
+    this._spawnPortalGrace = false;
     this._invertPlayerColors = false;
     this._deathBurstEmitter = null;
     this._deathFlashGraphics = null;
@@ -3140,6 +3141,9 @@ if (this.p.isFlying || this.p.isUfo) {
       ? surfaceY
       : (gameObj.getSlopeSurfaceY(previousWorldX) ?? surfaceY);
     if (this._slopeBackWallHit(gameObj, pieceWidth, playersY, surfaceY)) {
+      if (this.p.isWave && this._letterD) {
+        return { landed: false, died: false };
+      }
       return { landed: false, died: true, immediate: true, reason: 'slope-backwall' };
     }
     const capLand = this._slopeFlatCapLand(
@@ -3153,7 +3157,16 @@ if (this.p.isFlying || this.p.isUfo) {
       const insideSolid = gameObj.slopeSolidBelow
         ? (playersY - waveHalf < surfaceY)
         : (playersY + waveHalf > surfaceY);
-      if (insideSolid) return { landed: false, died: true, immediate: true };
+      if (insideSolid) {
+        if (this._letterD) {
+          this.p.y = this._slopeRideY(gameObj, surfaceY, angle, waveHalf, !!gameObj.slopeSolidBelow);
+          this.p.yVelocity = 0;
+          this.p.onGround = false;
+          this.p.onCeiling = false;
+          return { landed: false, died: false };
+        }
+        return { landed: false, died: true, immediate: true };
+      }
       return { landed: false, died: false };
     }
 
@@ -3472,6 +3485,45 @@ if (this.p.isFlying || this.p.isUfo) {
       this._rotation = this.slerp2D(this._rotation, _0x5e6a2b, _0x1857d4);
     }
   }
+  _tryLetterCeilingSave(top, bottom) {
+    if (!this._letterH && !this._letterF && !this._letterD) return false;
+    const isCube = !this.p.isFlying && !this.p.isWave && !this.p.isBall && !this.p.isUfo && !this.p.isSpider && !this.p.isRobot;
+    if (!(isCube || this.p.isRobot || this.p.isSpider)) return false;
+    const playerSize = this.p.isMini ? 18 : 30;
+    const gamemodeAddition = this.p.isWave ? 0 : (this.p.isFlying || this.p.isUfo ? 12 : 20);
+    const cameFromHeadSide = this.p.gravityFlipped
+      ? this.p.lastY - playerSize + gamemodeAddition >= bottom
+      : this.p.lastY + playerSize - gamemodeAddition <= top;
+    if (!cameFromHeadSide) return false;
+    if (this.p.gravityFlipped) {
+      this.p.y = bottom + playerSize;
+      this.p.collideBottom = bottom;
+    } else {
+      this.p.y = top - playerSize;
+      this.p.collideTop = top;
+    }
+    this.p.yVelocity = 0;
+    this.p.isJumping = false;
+    this.p.onGround = false;
+    if (this._letterF) {
+      this.flipGravity(!this.p.gravityFlipped);
+      this._syncOtherDualGravityForBlueBoost();
+      this.playGravityEffect(this.p.gravityFlipped);
+      this.p.yVelocity = 0;
+      this.p.onGround = false;
+      this.p.canJump = false;
+      this.runRotateAction();
+    }
+    return true;
+  }
+  _jBlockHoldJump() {
+    if (!this._letterJ) return false;
+    const justPressed = this.p.upKeyDown && !this.p.wasUpKeyDown;
+    if (justPressed) return false;
+    if (this._slopeRiding) return false;
+    const onBlock = this.p.gravityFlipped ? this.p.collideTop !== 0 : this.p.collideBottom !== 0;
+    return onBlock;
+  }
   breakabletheblock(gameObj) {
     if (!gameObj) return false;
     if (parseInt(gameObj.objid ?? 0, 10) !== 143) return false;
@@ -3536,7 +3588,7 @@ if (this.p.isFlying || this.p.isUfo) {
       this._updateSpiderJump(_0x3d1c6f);
     } else if (this.p.isRobot) {
       this._updateRobotJump(_0x3d1c6f);
-    } else if (this.p.upKeyDown && this.p.canJump) {
+    } else if (this.p.upKeyDown && this.p.canJump && !this._jBlockHoldJump()) {
       this.p.isJumping = true;
       this.p.onGround = false;
       this.p.canJump = false;
@@ -4201,7 +4253,7 @@ if (this.p.isFlying || this.p.isUfo) {
     let _boostedThisStep = false;
     let _teleportedThisStep = false;
     let _orbInputConsumedThisStep = false;
-    let _touchingTeleportDuringRespawnIgnore = false;
+    let _touchingPortalThisFrame = false;
     let bestSlopeCandidate = null;
     let bestSlopeGameObj = null;
     const preferHighestSlopeSurface = !this.p.gravityFlipped;
@@ -4210,6 +4262,38 @@ if (this.p.isFlying || this.p.isUfo) {
     let _slopeTangentThisFrame = 0;
     let _slopeBlockedThisStep = false;
     const _0x198534 = this._gameLayer.getNearbySectionObjects(pieceWidth);
+    this._letterD = false;
+    this._letterJ = false;
+    this._letterS = false;
+    this._letterH = false;
+    this._letterF = false;
+    for (let letterObj of _0x198534) {
+      if (letterObj.type !== letterBlockType) continue;
+      const letterRad = (letterObj.rotationDegrees || 0) * Math.PI / 180;
+      const letterCos = Math.cos(letterRad);
+      const letterSin = Math.sin(letterRad);
+      const letterHalfW = Math.abs(letterObj.w / 2 * letterCos) + Math.abs(letterObj.h / 2 * letterSin);
+      const letterHalfH = Math.abs(letterObj.w / 2 * letterSin) + Math.abs(letterObj.h / 2 * letterCos);
+      const letterHit = letterObj.letter === "d"
+        ? (this.p.isWave ? waveHitSize + 4 : playerSize + 6)
+        : playerSize;
+      const letterSweepLo = Math.min(playersY, playersLastY) - letterHit;
+      const letterSweepHi = Math.max(playersY, playersLastY) + letterHit;
+      const letterOverlap = pieceWidth + letterHit > letterObj.x - letterHalfW &&
+        pieceWidth - letterHit < letterObj.x + letterHalfW &&
+        letterSweepHi > letterObj.y - letterHalfH &&
+        letterSweepLo < letterObj.y + letterHalfH;
+      if (!letterOverlap) continue;
+      if (letterObj.letter === "d") this._letterD = true;
+      else if (letterObj.letter === "j") this._letterJ = true;
+      else if (letterObj.letter === "s") this._letterS = true;
+      else if (letterObj.letter === "h") this._letterH = true;
+      else if (letterObj.letter === "f") this._letterF = true;
+    }
+    if (this._letterS && this.p.isDashing) {
+      this.p.isDashing = false;
+      this.p.dashYVelocity = 0;
+    }
     for (let gameObj of _0x198534) {
       let left = gameObj.x - gameObj.w / 2;
       let right = gameObj.x + gameObj.w / 2;
@@ -4247,13 +4331,12 @@ if (this.p.isFlying || this.p.isUfo) {
             : this._isPlayerTouchingPortalHitbox(gameObj, pieceWidth, playersY, _broadSize);
           if (!_broadPhaseHit) continue;
         }
-        if (_colType === "portal_teleport" && this._ignoreTeleportUntilClear) {
-          _touchingTeleportDuringRespawnIgnore = true;
+        if (this._isPortalCollisionType(_colType)) _touchingPortalThisFrame = true;
+        if (_colType === "portal_teleport" && this._ignoreTeleportUntilClear && !this._spawnPortalGrace) {
           this._setObjectActivated(gameObj, true);
           continue;
         }
-        if (this.p.ignorePortals && (_colType.startsWith("portal_") || _colType === "speed")) {
-          if (_colType === "portal_teleport") _touchingTeleportDuringRespawnIgnore = true;
+        if (this.p.ignorePortals && !this._spawnPortalGrace && (_colType.startsWith("portal_") || _colType === "speed")) {
           this._setObjectActivated(gameObj, true);
           continue;
         }
@@ -4577,7 +4660,7 @@ if (this.p.isFlying || this.p.isUfo) {
           const _orbId = gameObj.orbId;
           const _isDash = (_orbId === 1704 || _orbId === 1751);
           const justPressed = this.p.upKeyDown && !this.p.wasUpKeyDown;
-          const _needsClick = !_orbInputConsumedThisStep && !this.p._orbActivationConsumedForPress && ((this.p.isFlying || this.p.isUfo) ? justPressed : (justPressed || (this.p.queuedHold && this.p.upKeyDown)));
+          const _needsClick = !_orbInputConsumedThisStep && !this.p._orbActivationConsumedForPress && !(this._letterS && _isDash) && ((this.p.isFlying || this.p.isUfo) ? justPressed : (justPressed || (this.p.queuedHold && this.p.upKeyDown)));
           this.p.touchingRing = true;
           if (!this._isObjectActivated(gameObj) && _needsClick) {
             this._orbpadHitEffect(gameObj, true);
@@ -4846,6 +4929,30 @@ if (this.p.isFlying || this.p.isUfo) {
           } else {
             iscolliding = pieceWidth + _0x55559d > left && pieceWidth - _0x55559d < right && playersY + _0x55559d > top && playersY - _0x55559d < bottom;
           }
+          if (this.p.isWave && this._letterD && iscolliding) {
+            if (window.noClip || this.breakabletheblock(gameObj)) {
+              continue;
+            }
+            const _dHalf = waveHitSize;
+            const _dY = this.p.y;
+            const _dTouches = pieceWidth + _dHalf > left && pieceWidth - _dHalf < right && _dY + _dHalf > top && _dY - _dHalf < bottom;
+            if (_dTouches) {
+              const _dPenUpper = bottom - (_dY - _dHalf);
+              const _dPenLower = (_dY + _dHalf) - top;
+              if (_dPenUpper < _dPenLower) {
+                this.p.y = bottom + _dHalf;
+              } else if (_dPenLower < _dPenUpper) {
+                this.p.y = top - _dHalf;
+              } else {
+                this.p.y = this.p.yVelocity > 0 ? top - _dHalf : bottom + _dHalf;
+              }
+              this.p.yVelocity = 0;
+              this.p.onGround = false;
+              this.p.onCeiling = false;
+              _0x30410f = true;
+            }
+            continue;
+          }
           const _0xLandBot = (this.p.yVelocity <= 0 || this.p.onGround) && (_0x146a97 >= bottom || _0x869e42 >= bottom);
           const _0xLandTop = (this.p.yVelocity >= 0 || this.p.onGround) && (_0x3e7199 <= top || _0x135a9d <= top);
           const isstandingOnAPlatform = this.p.gravityFlipped ? _0xLandTop : _0xLandBot;
@@ -4858,6 +4965,9 @@ if (this.p.isFlying || this.p.isUfo) {
               continue;
             }
             if (this.breakabletheblock(gameObj)) {
+              continue;
+            }
+            if (this._tryLetterCeilingSave(top, bottom)) {
               continue;
             }
             this.killPlayer();
@@ -4922,6 +5032,9 @@ if (this.p.isFlying || this.p.isUfo) {
             if (!this.p.gravityFlipped && (_0x3e7199 <= top || _0x135a9d <= top) && this.p.yVelocity >= 0) {
               if (iscolliding) {
                 if (this.breakabletheblock(gameObj)) {
+                  continue;
+                }
+                if (this._tryLetterCeilingSave(top, bottom)) {
                   continue;
                 }
                 this.killPlayer();
@@ -5053,8 +5166,9 @@ if (this.p.isFlying || this.p.isUfo) {
       this.killPlayer();
       return;
     }
-    if (this._ignoreTeleportUntilClear && !_touchingTeleportDuringRespawnIgnore) {
+    if ((this._ignoreTeleportUntilClear || this._spawnPortalGrace) && !_touchingPortalThisFrame) {
       this._ignoreTeleportUntilClear = false;
+      this._spawnPortalGrace = false;
     }
     if (_snappedSlopeThisFrame) {
       this._slopeContactFrames = this._slopeRiding ? (this._slopeContactFrames || 0) + 1 : 0;
@@ -5131,6 +5245,8 @@ if (this.p.isFlying || this.p.isUfo) {
         hitboxColor = 16711935;
       } else if (nearObject.type === slopeType) {
         hitboxColor = 65535;
+      } else if (nearObject.type === letterBlockType) {
+        hitboxColor = 16777215;
       }
       const xPos = isFlipped ? screenWidth - objXCenter : objXCenter;
       graphics.lineStyle(2, hitboxColor, 0.7);
@@ -5445,6 +5561,7 @@ if (this.p.isFlying || this.p.isUfo) {
     this._lastCollisionWorldX = Number.isFinite(_resetWorldX) ? _resetWorldX : null;
     this._lastCollisionWorldY = Number.isFinite(_resetWorldY) ? _resetWorldY : null;
     this._ignoreTeleportUntilClear = true;
+    this._spawnPortalGrace = true;
     this.setCubeVisible(true);
     this.setShipVisible(false);
     this.setBallVisible(false);

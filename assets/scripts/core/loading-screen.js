@@ -198,13 +198,13 @@ class BootScene extends Phaser.Scene {
 
     this.load.image("game_bg_01", "assets/game-bg/game_bg_01_001-hd.png");
     this.load.image("sliderBar", "assets/sprites/sliderBar.png");
-    this.load.image("GJ_MenuBeta", "assets/sprites/GJ_MenuBeta.png");
+    this.load.image("goldSweezr", "assets/sprites/goldSweezr.png");
     this.load.image("Phaserlogo", "assets/sprites/Phaserlogo.png");
     this.load.image("gravityLine_001", "assets/sprites/gravityLine_001.png");
-    this.load.atlas("GJ_WebSheet", "assets/sheets/GJ_WebSheet.png", "assets/sheets/GJ_WebSheet.json");
-    this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json");
+          if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_WebSheet.json"]) { this.load.atlas('GJ_WebSheet', "assets/sheets/GJ_WebSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_WebSheet.json"]); } else { this.load.atlas('GJ_WebSheet', "assets/sheets/GJ_WebSheet.png", "assets/sheets/GJ_WebSheet.json"); }
+    if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]) { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]); } else { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json"); }
     this.load.image("goldFont", "assets/fonts/goldFont.png");
-    this.load.text("goldFontFnt", "assets/fonts/goldFont.fnt");
+    if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]) { this.cache.text.set("goldFontFnt", window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]); } else { this.load.text("goldFontFnt", "assets/fonts/goldFont.fnt"); }
     
     this.load.once("complete", () => {
       const tex = this.textures.get("game_bg_01");
@@ -245,25 +245,25 @@ class BootScene extends Phaser.Scene {
         };
       }
 
-      this.load.atlas("GJ_GameSheet", "assets/sheets/GJ_GameSheet.png", "assets/sheets/GJ_GameSheet.json");
-      this.load.atlas("GJ_GameSheet02", "assets/sheets/GJ_GameSheet02.png", "assets/sheets/GJ_GameSheet02.json");
-      this.load.atlas("GJ_GameSheet03", "assets/sheets/GJ_GameSheet03.png", "assets/sheets/GJ_GameSheet03.json");
-      this.load.atlas("GJ_GameSheet04", "assets/sheets/GJ_GameSheet04.png", "assets/sheets/GJ_GameSheet04.json");
-      this.load.atlas("GJ_GameSheetEditor", "assets/sheets/GJ_GameSheetEditor.png", "assets/sheets/GJ_GameSheetEditor.json");
-      this.load.atlas("GJ_GameSheetGlow", "assets/sheets/GJ_GameSheetGlow.png", "assets/sheets/GJ_GameSheetGlow.json");
-      this.load.atlas("GJ_GameSheetIcons", "assets/sheets/GJ_GameSheetIcons.png", "assets/sheets/GJ_GameSheetIcons.json");
-      this.load.atlas("Wavesheet", "assets/sheets/Wavesheet.png", "assets/sheets/Wavesheet.json");
-      this.load.json("Spider_AnimDesc", "assets/sheets/Spider_AnimDesc.json");
-      this.load.json("Robot_AnimDesc", "assets/sheets/Robot_AnimDesc.json");
-      this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json");
-      this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", "assets/sheets/player_ball_00.json");
-      this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", "assets/sheets/player_dart_00.json");
-      this.load.atlas("CCControlColourPickerSpriteSheet-uhd", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.png", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.json");
-      this.load.atlas("PixelSheet_01-hd", "assets/sheets/PixelSheet_01.png", "assets/sheets/PixelSheet_01.json");
-      this.load.atlas("FireSheet_01-hd", "assets/sheets/FireSheet_01-hd.png", "assets/sheets/FireSheet_01-hd.json");
-      this.load.atlas("GJ_ParticleSheet-uhd", "assets/sheets/GJ_ParticleSheet.png", "assets/sheets/GJ_ParticleSheet.json");
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheet.json"]) { this.load.atlas('GJ_GameSheet', "assets/sheets/GJ_GameSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheet.json"]); } else { this.load.atlas('GJ_GameSheet', "assets/sheets/GJ_GameSheet.png", "assets/sheets/GJ_GameSheet.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheet02.json"]) { this.load.atlas("GJ_GameSheet02", "assets/sheets/GJ_GameSheet02.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheet02.json"]); } else { this.load.atlas("GJ_GameSheet02", "assets/sheets/GJ_GameSheet02.png", "assets/sheets/GJ_GameSheet02.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheet03.json"]) { this.load.atlas('GJ_GameSheet03', "assets/sheets/GJ_GameSheet03.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheet03.json"]); } else { this.load.atlas('GJ_GameSheet03', "assets/sheets/GJ_GameSheet03.png", "assets/sheets/GJ_GameSheet03.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheet04.json"]) { this.load.atlas("GJ_GameSheet04", "assets/sheets/GJ_GameSheet04.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheet04.json"]); } else { this.load.atlas("GJ_GameSheet04", "assets/sheets/GJ_GameSheet04.png", "assets/sheets/GJ_GameSheet04.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheetEditor.json"]) { this.load.atlas("GJ_GameSheetEditor", "assets/sheets/GJ_GameSheetEditor.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheetEditor.json"]); } else { this.load.atlas("GJ_GameSheetEditor", "assets/sheets/GJ_GameSheetEditor.png", "assets/sheets/GJ_GameSheetEditor.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheetGlow.json"]) { this.load.atlas("GJ_GameSheetGlow", "assets/sheets/GJ_GameSheetGlow.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheetGlow.json"]); } else { this.load.atlas("GJ_GameSheetGlow", "assets/sheets/GJ_GameSheetGlow.png", "assets/sheets/GJ_GameSheetGlow.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_GameSheetIcons.json"]) { this.load.atlas("GJ_GameSheetIcons", "assets/sheets/GJ_GameSheetIcons.png", window.__ATLAS_DATA["assets/sheets/GJ_GameSheetIcons.json"]); } else { this.load.atlas("GJ_GameSheetIcons", "assets/sheets/GJ_GameSheetIcons.png", "assets/sheets/GJ_GameSheetIcons.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/Wavesheet.json"]) { this.load.atlas("Wavesheet", "assets/sheets/Wavesheet.png", window.__ATLAS_DATA["assets/sheets/Wavesheet.json"]); } else { this.load.atlas("Wavesheet", "assets/sheets/Wavesheet.png", "assets/sheets/Wavesheet.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/Spider_AnimDesc.json"]) { this.cache.json.add("Spider_AnimDesc", window.__ATLAS_DATA["assets/sheets/Spider_AnimDesc.json"]); } else { this.load.json("Spider_AnimDesc", "assets/sheets/Spider_AnimDesc.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/Robot_AnimDesc.json"]) { this.cache.json.add("Robot_AnimDesc", window.__ATLAS_DATA["assets/sheets/Robot_AnimDesc.json"]); } else { this.load.json("Robot_AnimDesc", "assets/sheets/Robot_AnimDesc.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]) { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]); } else { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/player_ball_00.json"]) { this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", window.__ATLAS_DATA["assets/sheets/player_ball_00.json"]); } else { this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", "assets/sheets/player_ball_00.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/player_dart_00.json"]) { this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", window.__ATLAS_DATA["assets/sheets/player_dart_00.json"]); } else { this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", "assets/sheets/player_dart_00.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet.json"]) { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet.png", window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet.json"]); } else { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet.png", "assets/sheets/CCControlColourPickerSpriteSheet.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/PixelSheet_01.json"]) { this.load.atlas("PixelSheet_01", "assets/sheets/PixelSheet_01.png", window.__ATLAS_DATA["assets/sheets/PixelSheet_01.json"]); } else { this.load.atlas("PixelSheet_01", "assets/sheets/PixelSheet_01.png", "assets/sheets/PixelSheet_01.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/FireSheet_01.json"]) { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01.png", window.__ATLAS_DATA["assets/sheets/FireSheet_01.json"]); } else { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01.png", "assets/sheets/FireSheet_01.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]) { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]); } else { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", "assets/sheets/GJ_ParticleSheet.json"); }
       this.load.image("bigFont", "assets/fonts/bigFont.png");
-      this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt");
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]) { this.cache.text.set("bigFontFnt", window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]); } else { this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt"); }
       this.load.image("square04_001", "assets/sprites/square04_001.png");
       this.load.image("GJ_square02", "assets/sprites/GJ_square02.png");
       this.load.image("GJ_square01", "assets/sprites/GJ_square01.png");

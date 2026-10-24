@@ -206,6 +206,11 @@ const ringType = "ring";
 const triggerType = "trigger";
 const speedType = "speed";
 const slopeType = "slope";
+const letterBlockType = "letterblock";
+window.LETTER_BLOCK_IDS = { 1755: "d", 1813: "j", 1829: "s", 1859: "h", 2866: "f" };
+function letterBlockKind(id) {
+  return window.LETTER_BLOCK_IDS[id] || null;
+}
 const _SLOPE_DATA = {
   289:{gw:1,gh:1,angle:45,sq:false,dir:1}, 291:{gw:2,gh:1,angle:22.5,sq:false,dir:-1},
   294:{gw:1,gh:1,angle:45,sq:false},295:{gw:2,gh:1,angle:22.5,sq:false},
@@ -467,7 +472,7 @@ if (!allObjects[745]) {
     "glow_frame": "portal_16_front_glow_001.png",
     "gridH": 2.866666555404663,
     "gridW": 1.1333333253860474,
-    "spritesheet": "GJ_GameSheet02-uhd",
+    "spritesheet": "GJ_GameSheet02",
     "type": "portal",
     "z": 10,
     "portalParticle": true,
@@ -482,7 +487,7 @@ if (!allObjects[1331]) {
     "glow_frame": "portal_17_front_glow_001.png",
     "gridH": 2.866666555404663,
     "gridW": 1.1333333253860474,
-    "spritesheet": "GJ_GameSheet02-uhd",
+    "spritesheet": "GJ_GameSheet02",
     "type": "portal",
     "z": 10,
     "portalParticle": true,
@@ -1794,6 +1799,26 @@ window.LevelObject = class LevelObject {
     if (!visual) return;
     if (visual.container?.setVisible) visual.container.setVisible(visible);
   }
+  _spawnLetterBlockLabel(scene, levelObj, zDepth, worldX, baseY) {
+    const kind = letterBlockKind(levelObj.id);
+    if (!kind || !scene) return;
+    const spriteWorldX = worldX;
+    const label = scene.add.text(spriteWorldX, baseY, kind.toUpperCase(), {
+      fontFamily: "Pusab, Arial, sans-serif",
+      fontSize: "34px",
+      color: "#ffffff",
+      stroke: "#000000",
+      strokeThickness: 5
+    });
+    label.setOrigin(0.5);
+    label._eeEditorOnly = true;
+    label._eeWorldX = worldX;
+    label._eeBaseY = baseY;
+    label._eeLayer = 1;
+    label._eeZDepth = (Number.isFinite(zDepth) ? zDepth : 0) + 0.1;
+    label.setVisible(!!window.isEditor || window.showLetterBlocks === true);
+    this._addToSection(label);
+  }
   _spawnTriggerEditorVisual(levelObj, objectDef, linkedObjectId) {
     const scene = this._scene;
     if (!scene || !this.topContainer || !levelObj) return;
@@ -2405,6 +2430,10 @@ window.LevelObject = class LevelObject {
         registerColor(orbGlow, col1);
         registerToGroups(orbGlow, worldX, baseY);
         registerObjectSprite(orbGlow);
+        if (letterBlockKind(levelObj.id)) {
+          orbGlow._eeEditorOnly = true;
+          orbGlow.setVisible(!!window.isEditor || window.showLetterBlocks === true);
+        }
       }
     }
 
@@ -2422,6 +2451,11 @@ window.LevelObject = class LevelObject {
       sprite._eeBaseY = baseY;
       sprite._eeZDepth = objZDepth;
       sprite._eeOrigAlpha = 1;
+      if (letterBlockKind(levelObj.id)) {
+        sprite._eeEditorOnly = true;
+        sprite.setVisible(!!window.isEditor || window.showLetterBlocks === true);
+        this._spawnLetterBlockLabel(scene, levelObj, objZDepth, worldX, baseY);
+      }
       if (isSawObjectId) {
         sprite._isSaw = true;
         const isDecorativeSaw = objectDef?.type === decoType && frameName?.includes("sawblade");
@@ -2867,8 +2901,19 @@ window.LevelObject = class LevelObject {
       }
     };
 
+    const letterKind = letterBlockKind(levelObj.id);
     const slopeCollider = _createSlopeCollider(levelObj, objectDef, worldX, worldY);
-    if (slopeCollider) {
+    if (letterKind) {
+      const w = objectDef.gridW * a;
+      const h = objectDef.gridH * a;
+      const collider = new Collider(letterBlockType, worldX, worldY, w, h, levelObj.rot || 0);
+      collider.objid = levelObj.id;
+      collider.letter = letterKind;
+      registerCollider(collider);
+      this.objects.push(collider);
+      hasCollisionEntry = true;
+      this._addCollisionToSection(collider);
+    } else if (slopeCollider) {
       registerCollider(slopeCollider);
       this.objects.push(slopeCollider);
       hasCollisionEntry = true;
@@ -4297,7 +4342,8 @@ window.LevelObject = class LevelObject {
           visMinSection._eeActive = false;
           const showtheportalthing = !visMinSection._eePortalGuide || (!window.isEditor && window.enablePortalGuide !== false);
           const showtheorbthing = !visMinSection._eeOrbGuide || (!window.isEditor && window.enableOrbGuide !== false);
-          visMinSection.visible = showtheportalthing && showtheorbthing;
+          const showeditoronly = !visMinSection._eeEditorOnly || !!window.isEditor || window.showLetterBlocks === true;
+          visMinSection.visible = showtheportalthing && showtheorbthing && showeditoronly;
           visMinSection.x = visMinSection._eeWorldX;
           visMinSection.y = visMinSection._eeBaseY;
           if (!visMinSection._eeAudioScale) {
