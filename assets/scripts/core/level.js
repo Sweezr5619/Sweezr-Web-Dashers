@@ -3500,34 +3500,39 @@ window.LevelObject = class LevelObject {
       _0x141e9c.normal.visible = _0x488507;
     }
   }
-  updateVisibility(_0xa5f1e1) {
-    this.updateTriggerEditorVisuals();
-    if (window.enableLDM) {
-      try {
-        if (this._endPortalEmitter && typeof this._endPortalEmitter.stop === 'function') {
-          this._endPortalEmitter.stop();
-        }
-      } catch (e) {}
-      try {
-        if (Array.isArray(this._sections)) {
-          for (const sec of this._sections) {
-            if (!Array.isArray(sec)) continue;
-            for (const obj of sec) {
-              if (!obj) continue;
-              try {
-                if (typeof obj.stop === 'function') obj.stop();
-                if (obj.emitters && Array.isArray(obj.emitters)) {
-                  for (const em of obj.emitters) {
-                    try { if (typeof em.stop === 'function') em.stop(); } catch (e) {}
-                  }
+  _applyLowDetailMode() {
+    const enabled = !!window.enableLDM;
+    if (this._ldmState === enabled) return;
+    this._ldmState = enabled;
+    if (!enabled) return;
+    try {
+      if (this._endPortalEmitter && typeof this._endPortalEmitter.stop === 'function') {
+        this._endPortalEmitter.stop();
+      }
+    } catch (e) {}
+    try {
+      if (Array.isArray(this._sections)) {
+        for (const sec of this._sections) {
+          if (!Array.isArray(sec)) continue;
+          for (const obj of sec) {
+            if (!obj) continue;
+            try {
+              if (typeof obj.stop === 'function') obj.stop();
+              if (obj.emitters && Array.isArray(obj.emitters)) {
+                for (const em of obj.emitters) {
+                  try { if (typeof em.stop === 'function') em.stop(); } catch (e) {}
                 }
-              } catch (e) {}
-            }
+              }
+            } catch (e) {}
           }
         }
-      } catch (e) {}
-      try { if (this._glowSprites) for (const g of this._glowSprites) g.setVisible(false); } catch(e) {}
-    }
+      }
+    } catch (e) {}
+    try { if (this._glowSprites) for (const g of this._glowSprites) g.setVisible(false); } catch (e) {}
+  }
+  updateVisibility(_0xa5f1e1) {
+    this.updateTriggerEditorVisuals();
+    this._applyLowDetailMode();
     const _0x1dce22 = this._sectionContainers.length - 1;
     if (_0x1dce22 < 0) {
       return;
@@ -4549,6 +4554,7 @@ window.LevelObject = class LevelObject {
     }
   }
   resetObjects() {
+    this._ldmState = undefined;
     this._resetremovedobjects();
     for (let _0x3d473e of this.objects) {
       if (!_0x3d473e) {

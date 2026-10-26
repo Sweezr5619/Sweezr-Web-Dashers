@@ -4167,11 +4167,23 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       if (isComingSoonPage()) return visibleLevels[visibleLevels.length - 1] || window.currentlevel || [];
       return visibleLevels[currentPageIndex] || window.currentlevel || [];
     };
+    const defaultLdm = !!window.enableLDM;
+    const getLdmForLevel = (levelId) => {
+      if (!levelId) return defaultLdm;
+      const stored = localStorage.getItem("gd_ldm_" + levelId);
+      return stored === null ? defaultLdm : stored === "1";
+    };
+    const applyLdmForPage = () => {
+      if (isComingSoonPage()) return;
+      const levelId = window.currentlevel?.[2];
+      if (levelId) window.enableLDM = getLdmForLevel(levelId);
+    };
     const applyCurrentPage = () => {
       this._levelSelectIsComingSoonPage = isComingSoonPage();
       if (!isComingSoonPage() && visibleLevels[currentPageIndex]) {
         window.currentlevel = [...visibleLevels[currentPageIndex]];
       }
+      applyLdmForPage();
     };
     applyCurrentPage();
     const dotY = sh - 20;
@@ -4304,6 +4316,27 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
           this.events.on("preupdate", snapUpdate);
         }
       } else {
+        const ldmBtnW = 96;
+        const ldmBtnH = 34;
+        const ldmBtnCx = cardX + cardW / 2 - ldmBtnW / 2 - 16;
+        const ldmBtnCy = cardY - cardH / 2 + ldmBtnH / 2 + 12;
+        const ldmLocalX = ptr.x - cardContainer.x;
+        const ldmHit = ldmLocalX >= ldmBtnCx - ldmBtnW / 2 && ldmLocalX <= ldmBtnCx + ldmBtnW / 2 &&
+                       ptr.y >= ldmBtnCy - ldmBtnH / 2 && ptr.y <= ldmBtnCy + ldmBtnH / 2;
+        if (ldmHit) {
+          this.tweens.killTweensOf(cardBounceContainer, "scale");
+          cardBounceContainer.setScale(1);
+          if (!isComingSoonPage()) {
+            const levelId = window.currentlevel?.[2];
+            if (levelId) {
+              window.enableLDM = !getLdmForLevel(levelId);
+              localStorage.setItem("gd_ldm_" + levelId, window.enableLDM ? "1" : "0");
+              if (typeof this._saveSettings === "function") this._saveSettings();
+              buildCardContent();
+            }
+          }
+          return;
+        }
         if (ptr.x >= cardX - cardW/2 && ptr.x <= cardX + cardW/2 &&
             ptr.y >= cardY - cardH/2 && ptr.y <= cardY + cardH/2) {
             if (isComingSoonPage()) {
@@ -4337,6 +4370,8 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
                 this._audio.stopMusic();
                 this.input.enabled = true;
                 this.game.registry.set("autoStartGame", true);
+                window.enableLDM = getLdmForLevel(levelFileName);
+                if (typeof this._saveSettings === "function") this._saveSettings();
                 this.scene.restart(); 
             });
 
@@ -4491,6 +4526,20 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
         cardContentObjs.push(coinIcon);
         cardBounceContainer.add(coinIcon);
       }
+      const ldmOn = !!window.enableLDM;
+      const ldmBtnW = 96;
+      const ldmBtnH = 34;
+      const ldmBtnCx = cardW / 2 - ldmBtnW / 2 - 16;
+      const ldmBtnCy = -cardH / 2 + ldmBtnH / 2 + 12;
+      const ldmBg = this.add.graphics();
+      ldmBg.fillStyle(ldmOn ? 0x2ecc40 : 0x555555, 0.9);
+      ldmBg.fillRoundedRect(ldmBtnCx - ldmBtnW / 2, ldmBtnCy - ldmBtnH / 2, ldmBtnW, ldmBtnH, ldmBtnH / 2);
+      ldmBg.setScrollFactor(0).setDepth(157);
+      const ldmLabel = this.add.bitmapText(ldmBtnCx, ldmBtnCy, "bigFont", ldmOn ? "LDM: ON" : "LDM: OFF", 60)
+        .setScrollFactor(0).setDepth(157).setOrigin(0.5, 0.5);
+      ldmLabel.setScale(Math.min(0.4, (ldmBtnW - 10) / ldmLabel.width));
+      cardContentObjs.push(ldmBg, ldmLabel);
+      cardBounceContainer.add([ldmBg, ldmLabel]);
     };
     const barAreaY = cardY + cardH / 2 + 100;
     const barW2 = Math.min(600, sw - 200);
@@ -8410,7 +8459,7 @@ _showwippopup() {
       }
     }
     let quantizedDelta = this._quantizeDelta(deltaTime);
-    let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 4)) : 0;
+    let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 1)) : 0;
     if (subSteps > 60) {
       subSteps = 60;
     }
