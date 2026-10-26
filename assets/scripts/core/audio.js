@@ -516,7 +516,7 @@ class AudioManager {
     const audioContext = this._scene.sound.context;
     if (audioContext) {
       this._analyser = audioContext.createAnalyser();
-      this._analyser.fftSize = 2048;
+      this._analyser.fftSize = 512;
       this._meterBuffer = new Float32Array(this._analyser.fftSize);
       this._scene.sound.masterVolumeNode.connect(this._analyser);
       this._meteringEnabled = true;

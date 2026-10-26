@@ -8419,6 +8419,7 @@ _showwippopup() {
     let horizontalDelta = subStepDelta * playerSpeed * d;
     const initialY = this._state.y;
     const initialY2 = this._state2.y;
+    const _recordHitboxTrail = window.showHitboxTrail === true;
     for (let i = 0; i < subSteps; i++) {
       this._state.lastY = this._state.y;
       this._physicsFrame++;
@@ -8426,14 +8427,17 @@ _showwippopup() {
       if (this._macroBot?.playing) {
         this._macroBot.step(this._physicsFrame);
       }
-      const _dualInputState = {
-        upKeyDown: this._state.upKeyDown,
-        upKeyPressed: this._state.upKeyPressed,
-        queuedHold: this._state.queuedHold,
-        orbActivationConsumedForPress: !!this._state._orbActivationConsumedForPress
-      };
-      const _primaryGravityBefore = !!this._state.gravityFlipped;
-      const _primarySharedBefore = this._getDualSharedSignature(this._state);
+      let _dualInputState = null;
+      if (this._isDual) {
+        _dualInputState = {
+          upKeyDown: this._state.upKeyDown,
+          upKeyPressed: this._state.upKeyPressed,
+          queuedHold: this._state.queuedHold,
+          orbActivationConsumedForPress: !!this._state._orbActivationConsumedForPress
+        };
+      }
+      const _primaryGravityBefore = this._isDual ? !!this._state.gravityFlipped : false;
+      const _primarySharedBefore = this._isDual ? this._getDualSharedSignature(this._state) : 0;
       this._player.updateJump(verticalDelta);
       this._state.y += this._state.yVelocity * verticalDelta;
       this._player.checkCollisions(this._playerWorldX - centerX);
@@ -8505,7 +8509,7 @@ _showwippopup() {
         }
       }
 
-      if (!this._player._scene._slideIn){
+      if (_recordHitboxTrail && !this._player._scene._slideIn){
         if (!this._player._hitboxTrail) this._player._hitboxTrail = [];
         if (!this._player.p.isDead) {
           const _trailSize = this._player.p.isMini ? 18 : 30;
@@ -8675,11 +8679,8 @@ _applyMirrorEffect() {
     this._bg.setFlipX(isMirrored);
   }
   _getDualSharedSignature(state) {
-    if (!state) return "0|0";
-    return [
-      state.gravityFlipped ? 1 : 0,
-      state.mirrored ? 1 : 0
-    ].join("|");
+    if (!state) return 0;
+    return (state.gravityFlipped ? 1 : 0) | (state.mirrored ? 2 : 0);
   }
   _getDualModeId(state) {
     if (!state) return "cube";

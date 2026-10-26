@@ -1393,17 +1393,19 @@ class LevelEditor {
                 }
             }
 
-            if (!this._player._hitboxTrail) this._player._hitboxTrail = [];
-            if (!this._state.isDead) {
-                const trailSize = this._state.isMini ? 18 : 30;
-                this._player._hitboxTrail.push({ x: this._playerWorldX, y: this._state.y, rotation: this._player._rotation, size: trailSize, isWave: this._state.isWave });
-                if (this._player._hitboxTrail.length > 180) this._player._hitboxTrail.shift();
-            }
-            if (this._isDual && !this._state2.isDead) {
-                if (!this._player2._hitboxTrail) this._player2._hitboxTrail = [];
-                const trailSize2 = this._state2.isMini ? 18 : 30;
-                this._player2._hitboxTrail.push({ x: this._playerWorldX, y: this._state2.y, rotation: this._player2._rotation, size: trailSize2, isWave: this._state2.isWave });
-                if (this._player2._hitboxTrail.length > 180) this._player2._hitboxTrail.shift();
+            if (window.showHitboxTrail === true) {
+                if (!this._player._hitboxTrail) this._player._hitboxTrail = [];
+                if (!this._state.isDead) {
+                    const trailSize = this._state.isMini ? 18 : 30;
+                    this._player._hitboxTrail.push({ x: this._playerWorldX, y: this._state.y, rotation: this._player._rotation, size: trailSize, isWave: this._state.isWave });
+                    if (this._player._hitboxTrail.length > 180) this._player._hitboxTrail.shift();
+                }
+                if (this._isDual && !this._state2.isDead) {
+                    if (!this._player2._hitboxTrail) this._player2._hitboxTrail = [];
+                    const trailSize2 = this._state2.isMini ? 18 : 30;
+                    this._player2._hitboxTrail.push({ x: this._playerWorldX, y: this._state2.y, rotation: this._player2._rotation, size: trailSize2, isWave: this._state2.isWave });
+                    if (this._player2._hitboxTrail.length > 180) this._player2._hitboxTrail.shift();
+                }
             }
         }
     } finally {

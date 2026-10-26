@@ -3586,17 +3586,16 @@ window.LevelObject = class LevelObject {
     }
   }
   updateObjectDebugIds() {
-    if (window.showObjectIds && !window.enableLDM) {
-      if (this._debugIdTextsList && this._debugIdTextsList.length > 0) {
-        for (const idText of this._debugIdTextsList) {
-          if (idText) idText.setVisible(true);
-        }
-      }
-    } else {
-      if (this._debugIdTextsList && this._debugIdTextsList.length > 0 ) {
-        for (const idText of this._debugIdTextsList) {
-          if (idText) idText.setVisible(false);
-        }
+    const show = !!(window.showObjectIds && !window.enableLDM);
+    const list = this._debugIdTextsList;
+    if (show === this._debugIdTextsVisible && list === this._debugIdTextsListRef) {
+      return;
+    }
+    this._debugIdTextsVisible = show;
+    this._debugIdTextsListRef = list;
+    if (list && list.length > 0) {
+      for (const idText of list) {
+        if (idText) idText.setVisible(show);
       }
     }
   }
@@ -4315,17 +4314,17 @@ window.LevelObject = class LevelObject {
       for (const spr of sprites) {
         if (!spr || !spr.active) continue;
         if (spr._cantColor) continue;
-        if (spr._eePulsed) continue;
-        if (spr._eeAudioScale) continue;
+        if (spr._eePulsed) { spr._eeLastTint = null; continue; }
+        if (spr._eeAudioScale) { spr._eeLastTint = null; continue; }
         if (spr._isSaw && spr._SawColor !== undefined) {
           const sawHex = colorManager.getHex(spr._SawColor);
-          spr.setTint(sawHex);
+          if (spr._eeLastTint !== sawHex) { spr.setTint(sawHex); spr._eeLastTint = sawHex; }
           continue;
         }
         if (spr._isSaw) continue;
         if (spr._isBlack && !spr._canColor) continue;
-        if (spr._blackDefault && typeof colorManager.hasColor === "function" && !colorManager.hasColor(chId)) continue;
-        if (typeof spr.setTint === "function") spr.setTint(hex);
+        if (spr._blackDefault && typeof colorManager.hasColor === "function" && !colorManager.hasColor(chId)) { spr._eeLastTint = null; continue; }
+        if (typeof spr.setTint === "function" && spr._eeLastTint !== hex) { spr.setTint(hex); spr._eeLastTint = hex; }
       }
     }
   }
