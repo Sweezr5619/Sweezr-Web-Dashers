@@ -64,7 +64,7 @@ const phaserConfig = {
   },
   scene: [BootScene, GameScene]
 };
-new Phaser.Game(phaserConfig);
+window.game = new Phaser.Game(phaserConfig);
 
 window.clearGameCache = () => {
   if (window.gameCache) {
