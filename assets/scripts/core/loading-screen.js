@@ -230,16 +230,24 @@ class BootScene extends Phaser.Scene {
         const originalXhr = this.load.xhrLoader;
         this.load.xhrLoader = (file) => {
           const url = file.url;
+          const cleanUrl = url.split("?")[0];
+          const cacheable = cleanUrl.endsWith(".json") || cleanUrl.endsWith(".txt");
+
+          if (!cacheable) {
+            return originalXhr.call(this.load, file);
+          }
+
           if (window.gameCache.isFileCached(url)) {
             const cached = window.gameCache.getCachedFile(url);
             if (cached) {
               return new Promise((resolve) => {
-                setTimeout(() => { file.data = cached; resolve(file); }, 1);
+                file.data = cached;
+                resolve(file);
               });
             }
           }
           return originalXhr.call(this.load, file).then((result) => {
-            if (result && result.data) window.gameCache.cacheFile(url, result.data);
+            if (result && result.data !== undefined) window.gameCache.cacheFile(url, result.data);
             return result;
           });
         };
@@ -258,9 +266,9 @@ class BootScene extends Phaser.Scene {
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]) { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]); } else { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json"); }
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/player_ball_00.json"]) { this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", window.__ATLAS_DATA["assets/sheets/player_ball_00.json"]); } else { this.load.atlas("player_ball_00", "assets/sheets/player_ball_00.png", "assets/sheets/player_ball_00.json"); }
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/player_dart_00.json"]) { this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", window.__ATLAS_DATA["assets/sheets/player_dart_00.json"]); } else { this.load.atlas("player_dart_00", "assets/sheets/player_dart_00.png", "assets/sheets/player_dart_00.json"); }
-      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet.json"]) { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet.png", window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet.json"]); } else { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet.png", "assets/sheets/CCControlColourPickerSpriteSheet.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet-uhd.json"]) { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.png", window.__ATLAS_DATA["assets/sheets/CCControlColourPickerSpriteSheet-uhd.json"]); } else { this.load.atlas("CCControlColourPickerSpriteSheet", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.png", "assets/sheets/CCControlColourPickerSpriteSheet-uhd.json"); }
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/PixelSheet_01.json"]) { this.load.atlas("PixelSheet_01", "assets/sheets/PixelSheet_01.png", window.__ATLAS_DATA["assets/sheets/PixelSheet_01.json"]); } else { this.load.atlas("PixelSheet_01", "assets/sheets/PixelSheet_01.png", "assets/sheets/PixelSheet_01.json"); }
-      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/FireSheet_01.json"]) { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01.png", window.__ATLAS_DATA["assets/sheets/FireSheet_01.json"]); } else { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01.png", "assets/sheets/FireSheet_01.json"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/FireSheet_01-hd.json"]) { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01-hd.png", window.__ATLAS_DATA["assets/sheets/FireSheet_01-hd.json"]); } else { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01-hd.png", "assets/sheets/FireSheet_01-hd.json"); }
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]) { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]); } else { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", "assets/sheets/GJ_ParticleSheet.json"); }
       this.load.image("bigFont", "assets/fonts/bigFont.png");
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]) { this.cache.text.set("bigFontFnt", window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]); } else { this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt"); }
@@ -302,12 +310,15 @@ class BootScene extends Phaser.Scene {
 
       for (let i = 1; i < 23; i++) {
         let index = i - 1;
+        const rawIndex = i;
         i = String(i);
         if (i.length < 2) i = "0" + i;
         let paddedIndex = String(index);
         if (paddedIndex.length < 2) paddedIndex = "0" + paddedIndex;
         this.load.image("groundSquare_" + paddedIndex + "_001.png", "assets/game-ground/groundSquare_" + i + "_001.png");
-        this.load.image("groundSquare_" + paddedIndex + "_2_001.png", "assets/game-ground/groundSquare_" + i + "_2_001.png");
+        if (rawIndex >= 8) {
+          this.load.image("groundSquare_" + paddedIndex + "_2_001.png", "assets/game-ground/groundSquare_" + i + "_2_001.png");
+        }
       }
 
       for (let i = 1; i < 60; i++) {
