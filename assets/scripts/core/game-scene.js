@@ -8362,7 +8362,7 @@ _showwippopup() {
         _oSpr.rotation = baseRotation + gravityGuideRotation;
       }
     }
-    this._level.updateAudioScale(this._audio.getMeteringValue());
+    this._level.updateAudioScale(this._audio.getMeteringValue(), this._cameraX, screenWidth);
     if (!this._orbGfx) {
       this._orbGfx = this.add.graphics().setDepth(54).setBlendMode(S);
     }
