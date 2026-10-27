@@ -204,7 +204,7 @@ class BootScene extends Phaser.Scene {
           if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_WebSheet.json"]) { this.load.atlas('GJ_WebSheet', "assets/sheets/GJ_WebSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_WebSheet.json"]); } else { this.load.atlas('GJ_WebSheet', "assets/sheets/GJ_WebSheet.png", "assets/sheets/GJ_WebSheet.json"); }
     if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]) { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_LaunchSheet.json"]); } else { this.load.atlas("GJ_LaunchSheet", "assets/sheets/GJ_LaunchSheet.png", "assets/sheets/GJ_LaunchSheet.json"); }
     this.load.image("goldFont", "assets/fonts/goldFont.png");
-    if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]) { this.cache.text.set("goldFontFnt", window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]); } else { this.load.text("goldFontFnt", "assets/fonts/goldFont.fnt"); }
+    if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]) { this.cache.text.add("goldFontFnt", window.__ATLAS_DATA["assets/fonts/goldFont.fnt"]); } else { this.load.text("goldFontFnt", "assets/fonts/goldFont.fnt"); }
     
     this.load.once("complete", () => {
       const tex = this.textures.get("game_bg_01");
@@ -271,7 +271,7 @@ class BootScene extends Phaser.Scene {
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/FireSheet_01-hd.json"]) { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01-hd.png", window.__ATLAS_DATA["assets/sheets/FireSheet_01-hd.json"]); } else { this.load.atlas("FireSheet_01", "assets/sheets/FireSheet_01-hd.png", "assets/sheets/FireSheet_01-hd.json"); }
       if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]) { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", window.__ATLAS_DATA["assets/sheets/GJ_ParticleSheet.json"]); } else { this.load.atlas("GJ_ParticleSheet", "assets/sheets/GJ_ParticleSheet.png", "assets/sheets/GJ_ParticleSheet.json"); }
       this.load.image("bigFont", "assets/fonts/bigFont.png");
-      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]) { this.cache.text.set("bigFontFnt", window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]); } else { this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt"); }
+      if (window.__ATLAS_DATA && window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]) { this.cache.text.add("bigFontFnt", window.__ATLAS_DATA["assets/fonts/bigFont.fnt"]); } else { this.load.text("bigFontFnt", "assets/fonts/bigFont.fnt"); }
       this.load.image("square04_001", "assets/sprites/square04_001.png");
       this.load.image("GJ_square02", "assets/sprites/GJ_square02.png");
       this.load.image("GJ_square01", "assets/sprites/GJ_square01.png");
