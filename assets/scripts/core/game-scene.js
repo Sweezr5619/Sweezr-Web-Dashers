@@ -8459,11 +8459,12 @@ _showwippopup() {
       }
     }
     let quantizedDelta = this._quantizeDelta(deltaTime);
-    let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 1)) : 0;
-    if (subSteps > 60) {
-      subSteps = 60;
+    let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 2)) : 0;
+    if (subSteps > 120) {
+      subSteps = 120;
     }
     let subStepDelta = subSteps > 0 ? quantizedDelta / subSteps : 0;
+    let subStepSeconds = subStepDelta > 0 ? subStepDelta / 60 : 0;
     let verticalDelta = subStepDelta * d;
     let horizontalDelta = subStepDelta * playerSpeed * d;
     const initialY = this._state.y;
@@ -8540,9 +8541,9 @@ _showwippopup() {
         } else if (this._state.onGround) {
           this._player.updateGroundRotation(verticalDelta);
         } else if (this._player.rotateActionActive) {
-          this._player.updateRotateAction(u);
+          this._player.updateRotateAction(subStepSeconds);
         } else if (this._state.isDashing) {
-          this._player.updateDashRotation(u);
+          this._player.updateDashRotation(subStepSeconds);
         }
       }
       if (this._isDual && !this._state2.isDead && !this._state2.isFlying && !this._state2.isWave && !this._state2.isUfo) {
@@ -8552,9 +8553,9 @@ _showwippopup() {
         } else if (this._state2.onGround) {
           this._player2.updateGroundRotation(verticalDelta);
         } else if (this._player2.rotateActionActive) {
-          this._player2.updateRotateAction(u);
+          this._player2.updateRotateAction(subStepSeconds);
         } else if (this._state2.isDashing) {
-          this._player2.updateDashRotation(u);
+          this._player2.updateDashRotation(subStepSeconds);
         }
       }
 
