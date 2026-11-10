@@ -53,10 +53,7 @@ const phaserConfig = {
     windowEvents: false
   },
   render: {
-    powerPreference: "high-performance",
-    antialias: false,
-    roundPixels: true,
-    desynchronized: true
+    powerPreference: "high-performance"
   },
   scale: {
     mode: Phaser.Scale.FIT,

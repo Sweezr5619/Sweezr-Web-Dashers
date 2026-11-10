@@ -1606,8 +1606,14 @@ class PlayerObject {
       this._shipDragActive = false;
       this._streak.stop();
       this._streak.reset();
-      this._waveTrail.stop();
-      this._waveTrail.reset();
+      if (window.noWaveTrail || this.p.isDead) {
+        this._waveTrail.stop();
+        this._waveTrail.reset();
+      } else {
+        this._waveTrail.setPosition(this._scene._playerWorldX, b(this.p.y));
+        this._waveTrail.setMiniScale(this.p.isMini);
+        this._waveTrail.update(_0x5af874);
+      }
       return;
     }
 
@@ -1642,8 +1648,13 @@ class PlayerObject {
       this._waveTrail.setPosition(_0x119eb7, _0x519d38);
     }
     this._streak.update(_0x5af874);
-    this._waveTrail.setMiniScale(this.p.isMini);
-    this._waveTrail.update(_0x5af874);
+    if (window.noWaveTrail) {
+      this._waveTrail.stop();
+      this._waveTrail.reset();
+    } else {
+      this._waveTrail.setMiniScale(this.p.isMini);
+      this._waveTrail.update(_0x5af874);
+    }
     const _0x3d69d2 = this.p.isFlying || this.p.isUfo;
     if (_0x3d69d2 && !this._flyParticleActive) {
       this._flyParticleEmitter.start();
