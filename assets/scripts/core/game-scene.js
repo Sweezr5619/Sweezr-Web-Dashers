@@ -3688,6 +3688,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     });
 
     this.input.keyboard.on('keydown-N', () => {
+      if (this._menuActive) return;
       if (window._activeCustomInput) return;
       if (window.isEditor && !this._editorPlaytestActive) return;
       window.noClip = !window.noClip;
@@ -3696,6 +3697,7 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     });
 
     this.input.keyboard.on('keydown-H', () => {
+      if (this._menuActive) return;
       if (window._activeCustomInput) return;
       if (window.isEditor && !this._editorPlaytestActive) return;
       window.showHitboxes = !window.showHitboxes;
