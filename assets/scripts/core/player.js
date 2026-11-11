@@ -2487,6 +2487,10 @@ if (this.p.isFlying || this.p.isUfo) {
     if (this.p.isDead || this._scene._macroBot?.playing) {
       return;
     }
+    if (window.noClip) {
+      this.p.diedThisFrame = true;
+      return;
+    }
     this.p.isDead = true;
     this._scene.toggleGlitter(false);
     this._particleEmitter.stop();
@@ -4906,6 +4910,10 @@ if (this.p.isFlying || this.p.isUfo) {
             gameObj, pieceWidth, playersY, playersLastY, left, right, top, bottom, playerSize, waveHitSize, gamemodeAddition
           );
           if (slopeResult.died) {
+            if (window.noClip) {
+              this.p.diedThisFrame = true;
+              continue;
+            }
             this.killPlayer();
             return;
           }
@@ -5042,6 +5050,10 @@ if (this.p.isFlying || this.p.isUfo) {
             }
             if (!this.p.gravityFlipped && (_0x3e7199 <= top || _0x135a9d <= top) && this.p.yVelocity >= 0) {
               if (iscolliding) {
+                if (window.noClip) {
+                  this.p.diedThisFrame = true;
+                  continue;
+                }
                 if (this.breakabletheblock(gameObj)) {
                   continue;
                 }
@@ -5174,8 +5186,15 @@ if (this.p.isFlying || this.p.isUfo) {
       this.p.onCeiling = true;
     }
     if (this.p.y > 1890*4) {
-      this.killPlayer();
-      return;
+      if (window.noClip) {
+        this.p.diedThisFrame = true;
+        this.p.y = _0x3020c8 + _effectiveSize;
+        this.p.yVelocity = 0;
+        this.hitGround();
+      } else {
+        this.killPlayer();
+        return;
+      }
     }
     if ((this._ignoreTeleportUntilClear || this._spawnPortalGrace) && !_touchingPortalThisFrame) {
       this._ignoreTeleportUntilClear = false;
