@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Web Dashers</title>
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+  #boot {
+    position: fixed; inset: 0; z-index: 2147483647;
+    display: flex; flex-direction: column; gap: 12px;
+    align-items: center; justify-content: center;
+    background: #000; color: #fff; text-align: center; padding: 24px;
+    font: 600 20px system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  #bootSub { font: 400 13px system-ui, sans-serif; opacity: 0.65; max-width: 90vw; word-break: break-word; }
+  #boot button {
+    font: 600 15px system-ui, sans-serif; color: #fff; background: #1f6feb;
+    border: 0; border-radius: 8px; padding: 10px 22px; cursor: pointer; display: none;
+  }
+</style>
+<base id="baseTag" href="https://cdn.jsdelivr.net/gh/Sweezr5619/Sweezr-Web-Dashers@main/">
+</head>
+<body>
+<div id="boot">
+  <div id="bootMsg">Starting…</div>
+  <div id="bootSub"></div>
+  <button id="bootRetry" type="button">Retry</button>
+</div>
+<script>
+(async function () {
+    const OWNER = "Sweezr5619";
+    const REPO = "Sweezr-Web-Dashers";
+    const FALLBACK_REF = "dbb6149";
+    const HOSTS = ["cdn.jsdelivr.net", "fastly.jsdelivr.net", "gcore.jsdelivr.net"];
+
+    const msgEl = document.getElementById("bootMsg");
+    const subEl = document.getElementById("bootSub");
+    const retryBtn = document.getElementById("bootRetry");
+    const setMsg = (m) => { if (msgEl) msgEl.textContent = m; };
+    const setSub = (s) => { if (subEl) subEl.textContent = s; };
+    const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+    retryBtn.addEventListener("click", () => location.reload());
+
+    window.addEventListener("error", (e) => {
+        if (e && e.message) setMsg("Error: " + e.message);
+        else if (e && e.target && e.target.src) setMsg("Failed to load: " + e.target.src);
+    }, true);
+    window.addEventListener("unhandledrejection", (e) => {
+        const r = e && e.reason;
+        setMsg("Error: " + (r && r.message ? r.message : r));
+    });
+
+    const refUrl = (host, path) => `https://${host}/gh/${OWNER}/${REPO}@${ref}/${path}`;
+
+    let ref = FALLBACK_REF;
+    setMsg("Checking for the latest build…");
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        const api = await fetch(
+            `https://api.github.com/repos/${OWNER}/${REPO}/commits/main`,
+            { cache: "no-store", signal: controller.signal }
+        );
+        clearTimeout(timer);
+        if (api.ok) {
+            const json = await api.json();
+            if (json && json.sha) ref = json.sha;
+        }
+    } catch (e) {
+        console.warn("Commit lookup failed, using fallback build", e);
+    }
+
+    const buildLabel = "build " + ref.slice(0, 7);
+
+    try {
+        setMsg("Downloading game…");
+        setSub(buildLabel);
+
+        let host = HOSTS[0];
+        let html = null;
+        for (const h of HOSTS) {
+            for (let attempt = 0; attempt < 2 && html === null; attempt++) {
+                try {
+                    const res = await fetch(refUrl(h, "index.html") + "?t=" + Date.now(), { cache: "no-store" });
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    html = await res.text();
+                    host = h;
+                } catch (e) {
+                    setSub("Trying " + h + "…");
+                    await delay(600);
+                }
+            }
+            if (html !== null) break;
+        }
+        if (html === null) throw new Error("Could not download the game from any CDN");
+
+        const base = `https://${host}/gh/${OWNER}/${REPO}@${ref}/`;
+        document.getElementById("baseTag").href = base;
+
+        const doc = new DOMParser().parseFromString(html, "text/html");
+
+        for (const link of doc.querySelectorAll('link[rel="stylesheet"]')) {
+            const href = link.getAttribute("href");
+            if (!href) continue;
+            const el = document.createElement("link");
+            el.rel = "stylesheet";
+            el.href = new URL(href, base).href;
+            document.head.appendChild(el);
+        }
+
+        const items = [];
+        for (const s of doc.querySelectorAll("script")) {
+            const src = s.getAttribute("src");
+            if (src) items.push({ src });
+            else if (s.textContent && s.textContent.trim()) items.push({ code: s.textContent });
+        }
+
+        for (const item of items) {
+            if (!item.src) continue;
+            const pre = document.createElement("link");
+            pre.rel = "preload";
+            pre.as = "script";
+            pre.href = new URL(item.src, base).href;
+            pre.crossOrigin = "anonymous";
+            document.head.appendChild(pre);
+        }
+
+        setMsg("Loading game…");
+        setSub(buildLabel + " • first load may take a minute");
+
+        const injectScript = (url) => new Promise((resolve, reject) => {
+            const s = document.createElement("script");
+            s.src = url;
+            s.async = false;
+            s.crossOrigin = "anonymous";
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error("failed"));
+            document.head.appendChild(s);
+        });
+
+        const loadExternal = async (src) => {
+            const candidates = [];
+            for (let round = 0; round < 2; round++) {
+                for (const h of HOSTS) candidates.push({ host: h, retry: round > 0 });
+            }
+            for (const c of candidates) {
+                let url = refUrl(c.host, src);
+                if (c.retry) url += (src.includes("?") ? "&" : "?") + "_r=" + Date.now();
+                try {
+                    await injectScript(url);
+                    return;
+                } catch (e) {
+                    setSub("Retrying " + src + " …");
+                    await delay(400);
+                }
+            }
+            throw new Error("Failed to load " + src);
+        };
+
+        for (const item of items) {
+            if (item.src) {
+                await loadExternal(item.src);
+                if (/phaser(\.min)?\.js/i.test(item.src)) {
+                    const shim = document.createElement("script");
+                    shim.textContent = "if(window.Phaser&&Phaser.Cache&&Phaser.Cache.BaseCache&&!Phaser.Cache.BaseCache.prototype.set){Phaser.Cache.BaseCache.prototype.set=function(k,v){return this.add(k,v);};}";
+                    document.head.appendChild(shim);
+                }
+            } else {
+                const s = document.createElement("script");
+                s.textContent = item.code;
+                document.head.appendChild(s);
+            }
+        }
+
+        setMsg("Starting game…");
+        setSub(buildLabel);
+
+        let ticks = 0;
+        const iv = setInterval(() => {
+            ticks++;
+            let active = false;
+            try {
+                const g = window.game;
+                active = !!(g && g.scene && typeof g.scene.isActive === "function" && g.scene.isActive("GameScene"));
+            } catch (e) {}
+            if (active) {
+                clearInterval(iv);
+                setTimeout(() => {
+                    const el = document.getElementById("boot");
+                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                }, 400);
+                return;
+            }
+            if (ticks === 30) setSub(buildLabel + " • still loading… slow connection?");
+            if (ticks === 120) setSub(buildLabel + " • still loading… press F12 to check the console");
+        }, 500);
+    } catch (e) {
+        console.error(e);
+        setMsg("Failed to load Web Dashers");
+        setSub(String((e && e.message) || e));
+        retryBtn.style.display = "inline-block";
+    }
+})();
+</script>
+</body>
+</html>
