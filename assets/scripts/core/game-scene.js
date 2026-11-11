@@ -3687,6 +3687,32 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
       this.changeStartPos(1);
     });
 
+    this.input.keyboard.on('keydown-N', () => {
+      if (window._activeCustomInput) return;
+      if (window.isEditor && !this._editorPlaytestActive) return;
+      window.noClip = !window.noClip;
+      if (this._noclipIndicator) this._noclipIndicator.setVisible(window.noClip);
+      if (this._saveSettings) this._saveSettings();
+    });
+
+    this.input.keyboard.on('keydown-H', () => {
+      if (window._activeCustomInput) return;
+      if (window.isEditor && !this._editorPlaytestActive) return;
+      window.showHitboxes = !window.showHitboxes;
+      if (this._player?._hitboxGraphics) {
+        if (window.showHitboxes) {
+          this._player.drawHitboxes(this._player._hitboxGraphics, this._cameraX, this._cameraY);
+          if (this._isDual && this._player2?._hitboxGraphics) {
+            this._player2.drawHitboxes(this._player2._hitboxGraphics, this._cameraX, this._cameraY);
+          }
+        } else {
+          this._player._hitboxGraphics.clear();
+          if (this._player2?._hitboxGraphics) this._player2._hitboxGraphics.clear();
+        }
+      }
+      if (this._saveSettings) this._saveSettings();
+    });
+
     this._percentageLabel = this.add.bitmapText(screenWidth / 2, 20, "bigFont", "0%", 30).setOrigin(0.5, 0.5);
     this._percentageLabel.setVisible(false);
     this._percentageLabel.setDepth(100);
