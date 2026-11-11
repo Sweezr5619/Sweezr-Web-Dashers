@@ -3666,6 +3666,10 @@ this._menuUpdateLogBtn = this.add.image(screenWidth - 30 - 50, 33, "GJ_WebSheet"
     this._upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
     this._wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this._lKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
+    this._shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+    this._ctrlKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL);
+    this._fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+    this._jKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
     this._leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     this._rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
     this._aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -8250,7 +8254,7 @@ _showwippopup() {
       return;
     }
     this._applyJumpInput = () => {
-      const jumpHeld = this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown || this._lKey.isDown;
+      const jumpHeld = this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown || this._lKey.isDown || this._shiftKey.isDown || this._ctrlKey.isDown || this._fKey.isDown || this._jKey.isDown;
       if (!this._updateLogPopup && jumpHeld && !this._spaceWasDown) {
         this._pushButton();
       } else if (!jumpHeld && this._spaceWasDown) {

@@ -1270,7 +1270,7 @@ class LevelEditor {
         obj === this._editorPlaytestPlayBtn
     );
     const pointerHeld = pointer.isDown && !overPlaytestControls;
-    const jumpHeld = this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown || this._lKey.isDown || pointerHeld;
+    const jumpHeld = this._spaceKey.isDown || this._upKey.isDown || this._wKey.isDown || this._lKey.isDown || this._shiftKey.isDown || this._ctrlKey.isDown || this._fKey.isDown || this._jKey.isDown || pointerHeld;
 
     if (jumpHeld && !this._spaceWasDown) {
         this._editorPlaytestPress();
