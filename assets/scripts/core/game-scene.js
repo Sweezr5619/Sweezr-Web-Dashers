@@ -8463,10 +8463,17 @@ _showwippopup() {
       }
     }
     let quantizedDelta = this._quantizeDelta(deltaTime);
-    let subSteps = quantizedDelta > 0 ? Math.max(1, Math.round(quantizedDelta * 2)) : 0;
-    if (subSteps > 120) {
-      subSteps = 120;
+    this._physicsSubStepCarry = this._physicsSubStepCarry || 0;
+    let desiredSubSteps = quantizedDelta > 0 ? quantizedDelta * 2.4 + this._physicsSubStepCarry : 0;
+    let subSteps = Math.floor(desiredSubSteps);
+    if (subSteps < 1 && quantizedDelta > 0) {
+      subSteps = 1;
     }
+    if (subSteps > 144) {
+      subSteps = 144;
+      desiredSubSteps = 144;
+    }
+    this._physicsSubStepCarry = desiredSubSteps - subSteps;
     let subStepDelta = subSteps > 0 ? quantizedDelta / subSteps : 0;
     let subStepSeconds = subStepDelta > 0 ? subStepDelta / 60 : 0;
     let verticalDelta = subStepDelta * d;
