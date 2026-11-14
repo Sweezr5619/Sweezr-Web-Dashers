@@ -4907,15 +4907,19 @@ if (this.p.isFlying || this.p.isUfo) {
           return;
         } else if (_colType === slopeType) {
           const slopeResult = this._handleSlopeCollision(
-            gameObj, pieceWidth, playersY, playersLastY, left, right, top, bottom, playerSize, waveHitSize, gamemodeAddition
+            gameObj, pieceWidth, playersY, playersLastY, left, right, top, bottom, playerSize, waveHitSize, gamemodeAddition, previousWorldX
           );
           if (slopeResult.died) {
-            if (window.noClip) {
-              this.p.diedThisFrame = true;
-              continue;
+            if (slopeResult.immediate) {
+              if (window.noClip) {
+                this.p.diedThisFrame = true;
+                continue;
+              }
+              this.killPlayer();
+              return;
             }
-            this.killPlayer();
-            return;
+            _slopeKillPending = true;
+            continue;
           }
           if (slopeResult.landed && slopeResult.candidate) {
             const cand = slopeResult.candidate;
