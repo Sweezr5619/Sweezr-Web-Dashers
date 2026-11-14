@@ -3155,11 +3155,14 @@ if (this.p.isFlying || this.p.isUfo) {
     const lastSurfaceY = previousWorldX === undefined
       ? surfaceY
       : (gameObj.getSlopeSurfaceY(previousWorldX) ?? surfaceY);
-    if (this._slopeBackWallHit(gameObj, pieceWidth, playersY, surfaceY)) {
+    const _backWallLanding = gameObj.slopeSolidBelow
+      ? (playersLastY - playerSize + gamemodeAddition >= lastSurfaceY && (this.p.yVelocity <= 0 || this.p.onGround))
+      : (playersLastY + playerSize - gamemodeAddition <= lastSurfaceY && (this.p.yVelocity >= 0 || this.p.onGround));
+    if (!_backWallLanding && this._slopeBackWallHit(gameObj, pieceWidth, playersY, surfaceY)) {
       if (this.p.isWave && this._letterD) {
         return { landed: false, died: false };
       }
-      return { landed: false, died: true, immediate: true, reason: 'slope-backwall' };
+      return { landed: false, died: true, reason: 'slope-backwall' };
     }
     const capLand = this._slopeFlatCapLand(
       gameObj, pieceWidth, playersY, playersLastY, playerSize, gamemodeAddition);
