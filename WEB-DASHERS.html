@@ -51,7 +51,7 @@
         setMsg("Error: " + (r && r.message ? r.message : r));
     });
 
-    const refUrl = (host, path) => `https://${host}/gh/${OWNER}/${REPO}@${ref}/${path}`;
+    const refUrl = (host, path, refOverride = ref) => `https://${host}/gh/${OWNER}/${REPO}@${refOverride}/${path}`;
 
     let ref = FALLBACK_REF;
     setMsg("Checking for the latest build…");
@@ -139,20 +139,29 @@
             document.head.appendChild(s);
         });
 
+        let activeRef = ref;
         const loadExternal = async (src) => {
-            const candidates = [];
-            for (let round = 0; round < 2; round++) {
-                for (const h of HOSTS) candidates.push({ host: h, retry: round > 0 });
-            }
-            for (const c of candidates) {
-                let url = refUrl(c.host, src);
-                if (c.retry) url += (src.includes("?") ? "&" : "?") + "_r=" + Date.now();
-                try {
-                    await injectScript(url);
-                    return;
-                } catch (e) {
-                    setSub("Retrying " + src + " …");
-                    await delay(400);
+            const refs = [activeRef];
+            if (activeRef !== FALLBACK_REF) refs.push(FALLBACK_REF);
+            if (activeRef !== ref) refs.push(ref);
+            for (const useRef of refs) {
+                for (let round = 0; round < 2; round++) {
+                    for (const h of HOSTS) {
+                        let url = refUrl(h, src, useRef);
+                        if (round > 0) url += (src.includes("?") ? "&" : "?") + "_r=" + Date.now();
+                        try {
+                            await injectScript(url);
+                            if (useRef !== activeRef) {
+                                activeRef = useRef;
+                                console.warn("Loaded " + src + " from fallback build " + useRef.slice(0, 7));
+                                setSub("Using fallback build " + useRef.slice(0, 7));
+                            }
+                            return;
+                        } catch (e) {
+                            setSub("Retrying " + src + " …");
+                            await delay(400);
+                        }
+                    }
                 }
             }
             throw new Error("Failed to load " + src);
